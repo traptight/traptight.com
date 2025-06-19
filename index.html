@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,6 +11,7 @@
       font-family: Arial, sans-serif;
       background-color: #ffffff;
       color: #333;
+      overflow-x: hidden;
     }
     header {
       text-align: center;
@@ -21,6 +21,9 @@
     header img {
       max-width: 300px;
       height: auto;
+      cursor: grab;
+      position: relative;
+      z-index: 10;
     }
     .content {
       max-width: 800px;
@@ -44,11 +47,27 @@
       color: #777;
       background: #f9f9f9;
     }
+    .sticky-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #ffeb3b;
+      border-radius: 50%;
+      position: absolute;
+      pointer-events: none;
+      opacity: 0.7;
+      animation: fadeOut 1s forwards;
+    }
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        transform: scale(1.5);
+      }
+    }
   </style>
 </head>
 <body>
   <header>
-    <img src="traptight_logo_converted.png" alt="TrapTight Logo">
+    <img src="traptight_logo_converted.png" alt="TrapTight Logo" id="logo">
   </header>
   <div class="content">
     <h1>Welcome to TrapTight</h1>
@@ -63,5 +82,66 @@
   <footer>
     &copy; 2025 TrapTight. All rights reserved.
   </footer>
+
+  <script>
+    // Sticky Snap-Back Logo
+    const logo = document.getElementById('logo');
+    let isDragging = false;
+    let offsetX, offsetY;
+
+    logo.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      offsetX = e.clientX - logo.offsetLeft;
+      offsetY = e.clientY - logo.offsetTop;
+      logo.style.position = 'absolute';
+      logo.style.zIndex = 1000;
+      logo.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        logo.style.left = `${e.clientX - offsetX}px`;
+        logo.style.top = `${e.clientY - offsetY}px`;
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        logo.style.cursor = 'grab';
+        logo.style.transition = 'all 0.5s ease';
+        logo.style.left = '';
+        logo.style.top = '';
+        setTimeout(() => logo.style.transition = '', 500);
+      }
+    });
+
+    // Mouse icon becomes a rodent when hovering over logo
+    logo.addEventListener('mouseenter', () => {
+      logo.style.cursor = 'url("https://upload.wikimedia.org/wikipedia/commons/3/3e/Mouse-icon.png"), auto';
+    });
+
+    logo.addEventListener('mouseleave', () => {
+      logo.style.cursor = 'grab';
+    });
+
+    // Sticky Trail Effect
+    document.body.addEventListener('mousedown', () => {
+      document.body.addEventListener('mousemove', createTrail);
+    });
+
+    document.body.addEventListener('mouseup', () => {
+      document.body.removeEventListener('mousemove', createTrail);
+    });
+
+    function createTrail(e) {
+      const dot = document.createElement('div');
+      dot.classList.add('sticky-dot');
+      dot.style.left = `${e.pageX}px`;
+      dot.style.top = `${e.pageY}px`;
+      document.body.appendChild(dot);
+      setTimeout(() => dot.remove(), 1000);
+    }
+  </script>
 </body>
 </html>
